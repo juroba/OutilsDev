@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Operations" default="main">
+
+    <!-- ============= ALL PROPERTIES ============= -->
+
+    <property name="src.dir" value="src"/>
+    <property name="build.dir" value="build"/>
+    <property name="lib.dir" value="lib"/>
+    <property name="test.dir" value="test"/>
+
+    <property name="main-class" value="com.rpouiller.Operations"/>
+
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="jar.dir" value="${build.dir}/jar"/>
+
+    <property name="test-classes.dir" value="${build.dir}/test-classes"/>
+    <property name="junittest.dir" value="${build.dir}/junittest"/>    
+    <property name="junitreport.dir" value="${build.dir}/junitreport"/>
+
+
+    <!-- ============= ALL PATH ============= -->
+
+                <!-- Q8 -->
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+                <!-- Q9 -->
+
+    <path id="classpath-test">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar" />
+        </fileset>
+        <pathelement location="${jar.dir}/${ant.project.name}.jar"/>
+    </path>
+
+
+    <!-- ============= ALL CLEAN TARGETS ============= -->
+
+
+    <target name="clean" description="Suppression du dossier build">
+        <delete dir="${build.dir}"/>
+    </target>
+
+
+
+    <!-- ============= ALL COMPILE TARGETS ============= -->
+
+
+    <target name="compile" depends="clean" description='Création des dossiers build et build/classes puis compilation de src dans ce dossier'>
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}"/>
+    </target>
+
+                    <!-- Q7 -->
+
+    <target name="compile_cp_with_external_library" depends="clean" description='Création des dossiers build et build/classes puis compilation de src dans ce dossier'>
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}">
+            <classpath>
+                <pathelement location="${lib.dir}/log4j-core-2.6.2.jar"/>
+                <pathelement location="${lib.dir}/log4j-1.2-api-2.6.2.jar"/>
+                <pathelement location="${lib.dir}/log4j-api-2.6.2.jar"/>
+            </classpath>
+        </javac>
+    </target>
+
+                    <!-- Q8 -->
+
+    <target name="compile_cp_with_external_library_cp_with_path" depends="clean" description='Création des dossiers build et build/classes puis compilation de src dans ce dossier'>
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}">
+            <classpath refid="classpath"/>
+        </javac>
+    </target>
+
+                    <!-- Q9 -->
+
+    <target name="compile-test" depends="jar_cp_with_external_library_cp_with_path" description='Compilation du code des tests dans le répertoire test-classes'>
+        <mkdir dir="${test-classes.dir}"/>
+        <javac classpathref="classpath-test" srcdir="${test.dir}" destdir="${test-classes.dir}"/>
+    </target>
+
+
+    <!-- ============= ALL JAR TARGETS ============= -->
+
+
+    <target name="jar" depends="compile" description="Création du dossier jar dans build. Creation du fichier ${ant.project.name}.jar dans jar. Le manifest indique la classe à exécuter.">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+                    <!-- Q7 -->
+
+    <target name="jar_cp_with_external_library" depends="compile_cp_with_external_library" description="Création du dossier jar dans build. Creation du fichier ${ant.project.name}.jar dans jar. Le manifest indique la classe à exécuter.">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+                    <!-- Q8 -->
+
+    <target name="jar_cp_with_external_library_cp_with_path" depends="compile_cp_with_external_library_cp_with_path" description="Création du dossier jar dans build. Creation du fichier ${ant.project.name}.jar dans jar. Le manifest indique la classe à exécuter.">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+
+    <!-- ============= ALL JUNIT TARGETS ============= -->
+
+                        <!-- Q10 -->
+
+    <target name="junit" depends="compile-test">
+        <mkdir dir="${junittest.dir}"/>
+        <junit haltonfailure="no" failureproperty="test.failed" printsummary="yes">
+            <classpath>
+                <path refid="classpath"/>
+                <pathelement location="${jar.dir}/${ant.project.name}.jar"/>
+            </classpath>
+            <formatter type="xml"/>
+            <batchtest fork="yes" todir="${junittest.dir}">
+                <fileset dir="${test-classes.dir}" includes="**/*.class"/>
+            </batchtest>
+        </junit>
+        <fail message="Test failure detected, check test results." if="test.failed" />
+    </target>
+
+                        <!-- Q11 -->
+
+    <target name="junitreport" depends="junit">
+        <mkdir dir="${junitreport.dir}"/>
+        <junitreport todir="${junitreport.dir}">
+            <fileset dir="${junittest.dir}" includes="TEST-*.xml"/>
+            <report todir="${junitreport.dir}"/>
+        </junitreport>
+    </target>
+
+
+    <!-- ============= ALL RUN TARGETS ============= -->
+
+
+    <target name="run" depends="jar" description="Execution de ${ant.project.name}.jar">
+        <java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>
+    </target>
+
+                        <!-- Q6 -->
+
+    <target name="run_classname_pathement" depends="jar" description="Execution de ${ant.project.name}.jar">
+        <java classname="${main-class}" fork="true">
+            <classpath>
+                <pathelement path="${java.class.path}"/>
+                <pathelement location="${jar.dir}/${ant.project.name}.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+                        <!-- Q7 -->
+
+    <target name="run_classname_pathement_cp_with_external_library" depends="jar_cp_with_external_library" description="Execution de ${ant.project.name}.jar">
+        <java classname="${main-class}" fork="true">
+            <classpath>
+                <pathelement location="${src.dir}"/>
+                <pathelement path="${java.class.path}"/>
+                <pathelement location="${jar.dir}/${ant.project.name}.jar"/>
+                <pathelement location="${lib.dir}/log4j-core-2.6.2.jar"/>
+                <pathelement location="${lib.dir}/log4j-1.2-api-2.6.2.jar"/>
+                <pathelement location="${lib.dir}/log4j-api-2.6.2.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+                        <!-- Q8 -->
+
+    <target name="run_classname_pathement_cp_with_external_library_cp_with_path" depends="jar_cp_with_external_library_cp_with_path" description="Execution de ${ant.project.name}.jar">
+        <java classname="${main-class}" fork="true">
+            <classpath>
+                <pathelement location="${src.dir}"/>
+                <pathelement path="${java.class.path}"/>
+                <pathelement location="${jar.dir}/${ant.project.name}.jar"/>
+            </classpath>
+            <classpath refid="classpath"/>
+        </java>
+    </target>
+
+
+    <!-- ============= ALL ECHO PROPERTIES TARGETS ============= -->
+
+
+    <target name="try_echo_properties" description="Affichage des properties">
+        <echo message="java.version=${java.version}"/>
+        <echo message="ant.version=${ant.version}"/>
+        <echo message="basedir=${basedir}"/>
+        <echo message="java.class.path=${java.class.path}"/>
+    </target>
+
+
+    <!-- ============= ALL MAIN TARGETS ============= -->
+
+
+    <target name="main" depends="run_classname_pathement_cp_with_external_library_cp_with_path, try_echo_properties" description="Clean, Compile, Jar and Run"/>
+
+</project>

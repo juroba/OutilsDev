@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="HelloWorld" default="package" basedir=".">
+  <!-- 
+    Outre la définition des cibles, un buid.xml peut contenir la définition de propriétés/property et de chemin/path visant à factoriser le code XML du build pour en simplifier sa maintenance. 
+    Ces définitions sont placées avant celles des cibles.
+  -->
+
+  <!-- Définition des propriétés -->
+
+    <property name="src.dir" value="src" />
+    <property name="project.license" location="LICENSE" />
+    <property file="project.properties" />
+    <!-- et aussi avec l'option "-D nom=valeur" en ligne de commande -->
+
+
+  <!-- Définition des chemins -->
+
+  <!-- Si un même chemin se répète dans plusieurs tâches 
+       alors on le définit en `path` avec un `id` et on y référence avec un `refid`
+  -->    
+    <path id="classpath">
+      <pathelement location="lib/helper.jar"/>
+      <pathelement path="lib/junit.jar:lib/svn.jar"/>
+      <fileset dir="lib">
+        <include name="**/*.jar"/>
+      </fileset>
+      <!-- <path refid="basepath"> -->
+    </path>
+
+
+  <!-- Définition des cibles -->
+  <target name="try_properties" description="try properties">
+    <echo message="Valeur de la propriété src.dir=${src.dir}"/>
+    <echo message="Valeur de la propriété project.license=${project.license}"/>
+  </target>
+
+  <target name="init">
+    <mkdir dir="build/classes"/>
+    <mkdir dir="dist"/>
+  </target>
+  
+  <target name="compile" depends="init" description="Compile Source Code">
+    <javac srcdir="${src.dir}" destdir="build/classes"/>
+  </target>
+
+  <!-- 
+    Un classpath, élément utile pour certaines tâches, se définit à l’aide d’éléments ` pathelement`. 
+    Deux attributs exclusifs :
+    * `location` spécifie un seul fichier ou répertoire de manière absolue/relative
+    * `path` spécifie une liste de location séparée par un ’ ;’ ou un ’ :’
+    En général, on utilise path avec des chemins prédéfinis et de multiples éléments locations dans les autres cas
+  -->
+  <target name="compile_with_cp_pathelement" depends="init" description="Compile Source Code avec cp pathemement">
+    <javac srcdir="${src.dir}" destdir="build/classes">
+      <classpath>
+        <pathelement location="lib/helper.jar"/>
+        <pathelement path="lib/junit.jar:lib/svn.jar"/>
+      </classpath>
+    </javac>
+  </target>
+
+  
+  <!-- 
+    !!! Noter que les refid sont différents des property !!! On ne les marque pas avec ${}
+  -->
+  <target name="compile_with_cp_path" depends="init" description="Compile Source Code avec cp path">
+    <javac srcdir="${src.dir}" destdir="build/classes">
+      <classpath>
+        <path refid="classpath"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="package" depends="compile" description="Generate jar file">
+    <jar destfile="dist/HelloWorld.jar" basedir="build/classes"/>
+  </target>
+  
+  <target name="clean" description="Delete generated directories">
+    <delete dir="build"/>
+    <delete dir="dist"/>
+  </target>
+
+</project>

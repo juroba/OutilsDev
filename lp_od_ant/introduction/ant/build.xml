@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="HelloWorld" default="package" basedir=".">
+  <!-- Ce fichier exemple contient 4 opérations principales (on parle de cible/target).
+        La première cible s'appelle init. Elle compte deux opérations élémentaires (on parle de tâche/task). 
+        Les trois cibles suivantes ont une description qui sera affichée si l'on tape la commande : 
+          ant -projecthelp
+        La 3e cible dépend de la bonne réalisation de la cible 2, qui elle-même dépend de la bonne réalisation de la première.
+        On peut exécuter une cible en particulier avec par exemple
+          ant compile
+        Ou bien exécuter la cible par défaut (définie dans l'en-tête du fichier).
+
+        Après génération de l'archive, on peut l'exécuter avec 
+          java -cp dist/HelloWorld.jar HelloWorld
+  
+        En-tête 
+        * name : nom du projet
+        * default : cible par défaut à exécuter si aucune cible précisée
+        * basedir : répertoire de référence pour la localisation relative des autres répertoires
+  -->
+
+  <target name="init">
+    <mkdir dir="build/classes"/>
+    <mkdir dir="dist"/>
+  </target>
+  
+  <target name="compile" depends="init" description="Compile Source Code">
+    <javac srcdir="src" destdir="build/classes"/>
+  </target>
+  
+  <target name="package" depends="compile" description="Generate jar file">
+    <jar destfile="dist/HelloWorld.jar" basedir="build/classes"/>
+  </target>
+  
+  <target name="clean" description="Delete generated directories">
+    <delete dir="build"/>
+    <delete dir="dist"/>
+  </target>
+
+</project>
